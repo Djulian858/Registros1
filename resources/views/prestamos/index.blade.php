@@ -1,0 +1,84 @@
+@extends('layouts.app')
+
+@section('content')
+
+<h2>Registro de Préstamo - ENTREGA DE EQUIPO</h2>
+
+@if($errors->any())
+<div class="alert alert--error">
+    <p class="alert__title">Corrige los siguientes errores:</p>
+    <ul style="margin:8px 0 0 16px;">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
+<form action="{{ route('prestamos.store') }}" method="POST">
+    @csrf
+    <fieldset>
+        <legend style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">📦 ENTREGA DE EQUIPO</legend>
+
+        <div class="form-group">
+            <label for="colaborador">Colaborador:</label>
+            <input type="text" id="colaborador" name="colaborador" required placeholder="Nombre del colaborador">
+        </div>
+
+        <div class="form-group">
+            <label for="correo_colaborador">Correo:</label>
+            <input type="email" id="correo_colaborador" name="correo_colaborador" value="colaborador@institucion.edu.co" placeholder="correo@institucion.edu.co">
+        </div>
+
+        <div class="form-group">
+            <label for="serial_pc">Serial:</label>
+            <input type="text" id="serial_pc" name="serial_pc" required placeholder="Número de serie del equipo">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="tipo-equipo">Tipo de equipo:</label>
+                <select name="tipo-equipo" id="tipo-equipo" required>
+                    <option value="">Seleccione un tipo</option>
+                    <option value="Portátil">Portátil</option>
+                    <option value="Escritorio">Escritorio</option>
+                    <option value="Tablet">Tablet</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="modelo_equipo">Modelo de equipo:</label>
+                <input type="text" id="modelo_equipo" name="modelo_equipo" placeholder="Modelo del equipo">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="fecha_entrega">Fecha entrega:</label>
+                <input type="date" id="fecha_entrega" name="fecha_entrega" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hora_entrega">Hora entrega:</label>
+                <input type="time" id="hora_entrega" name="hora_entrega" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="entregado_por">Entregado por:</label>
+            <input type="email" id="entregado_por" name="entregado_por"
+                   value="{{ $defaultEntregadoPor }}" required placeholder="correo@institucion.edu.co">
+        </div>
+
+        <div class="form-group">
+            <label for="observaciones_prestamo">Observaciones:</label>
+            <textarea id="observaciones_prestamo" name="observaciones_prestamo" placeholder="Comentarios adicionales"></textarea>
+        </div>
+    </fieldset>
+
+    <button type="submit" style="margin-top: 20px;">Guardar Registro</button>
+</form>
+
+<a href="{{ route('prestamos.ver') }}">Ver registros</a>
+
+@endsection
