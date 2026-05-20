@@ -1,120 +1,122 @@
-# Sistema de Registro de Préstamo de Equipos - Instrucciones de Actualización
+# Sistema de Registro de Préstamo de Equipos
 
-## Cambios Realizados
+## Stack actual
 
-Se han implementado todos los cambios solicitados:
+- **Framework:** Laravel 13 (PHP 8.4)
+- **Base de datos:** MySQL — base de datos `trabajo`
+- **Correo:** Laravel Mail con SMTP Gmail (puerto 465 / SSL)
+- **Credenciales:** gestionadas exclusivamente desde `.env`
 
-### ✅ Cambios en la Interfaz
+---
 
-1. **Registro Editable**: Los registros ahora pueden editarse después de ser guardados
-2. **Campos Editables**: 
-   - Hora de devolución
-   - Fecha de devolución  
-   - Observaciones de devolución
-   - Entregado por
-
-3. **Cambios de Etiquetas**:
-   - "Docente" → "Colaborador"
-   - "Recibido por" → "Entregado por"
-
-4. **Correo Estándar**: El campo de correo viene pre-llenado con "colaborador@institucion.edu.co"
-
-5. **Reorden de Campos** (Primera Parte - Préstamo):
-   - Colaborador (Prestado por)
-   - Correo
-   - Serial
-   - Tipo de equipo
-   - **Modelo de equipo** (NUEVO)
-   - Fecha entrega
-   - Hora entrega
-   - Entregado por
-   - Observaciones (Préstamo)
-
-6. **Segunda Parte** (Devolución - Editable):
-   - Fecha de devolución
-   - Hora de devolución
-   - Observaciones (Devolución)
-
-7. **Observaciones en Ambos Lados**: 
-   - Observaciones de préstamo
-   - Observaciones de devolución
-
-## Archivos Modificados/Creados
-
-- `index.php` - Formulario actualizado con nueva estructura
-- `guardar.php` - Script actualizado para guardar nuevos campos
-- `ver.php` - Vista mejorada con funcionalidad de edición
-- `editar.php` - NUEVO: Permite editar datos de devolución
-- `eliminar.php` - NUEVO: Permite eliminar registros
-- `migrar_bd.php` - NUEVO: Script de migración automática
-
-## Paso 1: Ejecutar la Migración de Base de Datos
-
-Accede a este archivo desde tu navegador:
+## Estructura del proyecto
 
 ```
-http://localhost:8080/migrar_bd.php
+Registros1/
+├── app/
+│   ├── Http/Controllers/PrestamosController.php   ← lógica principal
+│   ├── Mail/PrestamoRegistrado.php                ← correo de nuevo préstamo
+│   ├── Mail/DevolucionRegistrada.php              ← correo de devolución
+│   └── Models/Prestamo.php                        ← modelo Eloquent
+├── database/
+│   └── migrations/
+│       └── ..._create_prestamos_table.php
+├── public/                                        ← raíz del servidor web
+│   ├── css/estilos.css
+│   ├── js/script.js
+│   └── img/
+├── resources/
+│   └── views/
+│       ├── layouts/app.blade.php                  ← layout principal
+│       ├── prestamos/index.blade.php              ← formulario de préstamo
+│       ├── prestamos/ver.blade.php                ← lista de registros
+│       ├── prestamos/resultado.blade.php          ← pantalla de resultado
+│       └── emails/                               ← plantillas de correo
+├── routes/web.php
+└── .env                                           ← credenciales (no va al git)
 ```
 
-Este script automáticamente:
-- Detectará los cambios necesarios en la base de datos
-- Renombrará las columnas antiguas
-- Agregará nuevas columnas
-- Eliminará columnas innecesarias
-- Migrará datos antiguos si existen
+---
 
-## Paso 2: Usar el Sistema
+## Configuración inicial (primera vez)
 
-### Crear un nuevo registro:
-1. Ve a `http://localhost:8080/`
-2. Llena los datos del PRÉSTAMO (obligatorios)
-3. Opcionalmente, completa datos de la DEVOLUCIÓN
-4. Haz clic en "Guardar Registro"
+### 1. Copiar el archivo de entorno
 
-### Ver registros:
-1. Haz clic en "Ver registros"
-2. Se mostrarán todos los registros con dos secciones: PRÉSTAMO y DEVOLUCIÓN
-
-### Editar devolución:
-1. En la vista de registros, haz clic en "✏️ Editar Devolución"
-2. Completa fecha, hora y observaciones de devolución
-3. Haz clic en "✅ Guardar Cambios"
-
-### Eliminar registro:
-1. En la vista de registros, haz clic en "🗑️ Eliminar"
-2. Confirma la eliminación
-
-## Estructura de la Base de Datos (Columnas Finales)
-
-```
-- id (INT, primary key)
-- colaborador (VARCHAR)
-- correo_colaborador (VARCHAR)
-- serial_pc (VARCHAR)
-- tipo_equipo (VARCHAR)
-- modelo_equipo (VARCHAR) - NUEVO
-- fecha_entrega (DATE)
-- hora_entrega (TIME)
-- fecha_devolucion (DATE) - NUEVO
-- hora_devolucion (TIME)
-- entregado_por (VARCHAR) - RENOMBRADO
-- observaciones_prestamo (TEXT) - NUEVO
-- observaciones_devolucion (TEXT) - NUEVO
+```bash
+cp .env.example .env
 ```
 
-## Solución de Problemas
+Luego edita `.env` con tus datos reales de base de datos y correo.
 
-### Si la migración falla:
-1. Asegúrate de que la base de datos "trabajo" existe
-2. Verifica que el usuario "root" tiene permisos
-3. Intenta acceder nuevamente a `migrar_bd.php`
+### 2. Instalar dependencias
 
-### Si hay errores al guardar:
-1. Verifica la conexión a la base de datos en `conexion.php`
-2. Asegúrate de que la tabla prestamos existe
-3. Ejecuta nuevamente `migrar_bd.php`
+```bash
+composer install
+```
 
-## Apoyo
+### 3. Generar clave de aplicación
 
-Si tienes problemas, verifica en la consola del navegador (F12) o en los logs de PHP.
+```bash
+php artisan key:generate
+```
 
+### 4. Crear la tabla en MySQL
+
+Asegúrate de que la base de datos `trabajo` existe, luego:
+
+```bash
+php artisan migrate
+```
+
+### 5. Levantar el servidor
+
+```bash
+php artisan serve
+# → http://localhost:8000
+```
+
+---
+
+## Variables del .env relevantes para este proyecto
+
+| Variable | Descripción |
+|---|---|
+| `DB_DATABASE` | Nombre de la base de datos (por defecto: `trabajo`) |
+| `MAIL_USERNAME` | Correo Gmail remitente |
+| `MAIL_PASSWORD` | Contraseña de aplicación Gmail (entre comillas si tiene espacios) |
+| `MAIL_FROM_ADDRESS` | Dirección del remitente |
+| `APP_DEFAULT_ENTREGADO_POR` | Email predeterminado en el campo "Entregado por" |
+| `APP_ADMIN_NAME` | Nombre del administrador que aparece en los correos |
+
+---
+
+## Columnas de la tabla `prestamos`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | INT | Clave primaria |
+| `colaborador` | VARCHAR | Nombre del colaborador |
+| `correo_colaborador` | VARCHAR | Correo del colaborador |
+| `serial_pc` | VARCHAR | Serial del equipo |
+| `tipo_equipo` | VARCHAR | Portátil / Escritorio / Tablet |
+| `modelo_equipo` | VARCHAR | Modelo del equipo |
+| `fecha_entrega` | DATE | Fecha de entrega |
+| `hora_entrega` | VARCHAR | Hora de entrega |
+| `entregado_por` | VARCHAR | Correo de quien entrega |
+| `observaciones_prestamo` | TEXT | Observaciones al momento de entregar |
+| `fecha_devolucion` | DATE | Fecha de devolución (nullable) |
+| `hora_devolucion` | VARCHAR | Hora de devolución (nullable) |
+| `observaciones_devolucion` | TEXT | Observaciones al momento de devolver (nullable) |
+| `created_at` / `updated_at` | TIMESTAMP | Gestionados por Laravel |
+
+---
+
+## Rutas disponibles
+
+| Método | URL | Acción |
+|---|---|---|
+| GET | `/` | Formulario de nuevo préstamo |
+| POST | `/prestamos` | Guardar préstamo |
+| GET | `/ver` | Lista de todos los registros |
+| PATCH | `/editar` | Actualizar devolución |
+| DELETE | `/prestamos/{id}` | Eliminar registro |
